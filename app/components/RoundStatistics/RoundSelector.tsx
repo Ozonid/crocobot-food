@@ -15,7 +15,7 @@ export default function RoundSelector({
     <div className="flex w-full max-w-[1200px] flex-col items-center gap-2">
       <div className="grid w-full grid-cols-15 gap-1">
         {Array.from({ length: CS_GO_MAX_ROUNDS }).map((_, idx) => {
-          const isDisabled = idx >= rounds.length - 1
+          const isDisabled = idx >= rounds.length
           const roundData = rounds[idx]
           return (
             <button

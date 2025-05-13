@@ -1,7 +1,5 @@
 import type { RoundData, Player, GameData, SteamId, RoundPlayerData } from '@/app/types/Data'
 import type { EventDefinition } from '@/app/types/Events'
-import { getTimestamp } from './getTimestamp'
-import { produce } from 'immer'
 import {
   getLeftBuyzoneEvent,
   getPurchaseEvent,
@@ -15,13 +13,15 @@ import {
 import { getScore } from './getScore'
 import { extractTeamData } from './getTeams'
 import { getStartingMoney } from './getStartingMoney'
+import { getTimestamp } from '@/app/utils/logParser/getTimestamp'
+import { TIMESTAMP_REGEX } from '@/app/utils/logParser/getTimestamp'
 
 const ROUND_SEPARATOR_REGEX = /.+\[FACEIT\^\] [A-Za-z ]+ \[\d+ - \d+\] [A-Za-z]+/
 export const processGameLog = (gameLog: string): GameData => {
   const chunks = gameLog.split(/.+World triggered "Match_Start".+/)
   const relevantLog = chunks[chunks.length - 1]
 
-  const roundLogs = relevantLog.split(ROUND_SEPARATOR_REGEX)
+  const roundLogs = relevantLog.split(ROUND_SEPARATOR_REGEX).slice(0, -1)
   const teams = extractTeamData(roundLogs[0])
 
   return {
@@ -38,69 +38,15 @@ export const processGameLog = (gameLog: string): GameData => {
 
 const CT_TEAM_REGEX = /Team playing "CT": (.+)/
 const TERRORIST_TEAM_REGEX = /Team playing "TERRORIST": (.+)/
+const ROUND_START_REGEX = new RegExp(`${TIMESTAMP_REGEX.source}: World triggered "Round_Start"`)
+const ROUND_END_REGEX = new RegExp(`${TIMESTAMP_REGEX.source}: World triggered "Round_End"`)
 
 const processRoundLog = (roundLogs: string, players: Player[], roundNumber: number): RoundData => {
-  const roundData = roundLogs
-    .split('\n')
-    .reduce<Omit<RoundData, 'players' | 'winner' | 'rawText' | 'targetBombed'>>(
-      (result, line) =>
-        produce(result, (draft) => {
-          // round metadata
-          if (line.includes('World triggered "Round_Start"')) {
-            draft.roundStartTimestamp = getTimestamp(line)
-          }
-          if (line.includes('World triggered "Round_End"')) {
-            draft.roundEndTimestamp = getTimestamp(line)
-          }
-          if (line.includes('Team playing "CT"')) {
-            draft.sides.CT = line.match(CT_TEAM_REGEX)?.[1] ?? ''
-          }
-          if (line.includes('Team playing "TERRORIST"')) {
-            draft.sides.TERRORIST = line.match(TERRORIST_TEAM_REGEX)?.[1] ?? ''
-          }
-          if (line.includes('MatchStatus: Score')) {
-            draft.scores = getScore(line)
-          }
-          // events
-          if (line.includes('left buyzone')) {
-            draft.events.push(getLeftBuyzoneEvent(line))
-          }
-          if (line.includes('money change') && line.includes('purchase')) {
-            draft.events.push(getPurchaseEvent(line))
-          }
-          if (line.includes('threw')) {
-            draft.events.push(getThrowEvent(line))
-          }
-          if (line.includes('attacked')) {
-            draft.events.push(getAttackEvent(line))
-          }
-          if (line.includes('assisted killing')) {
-            draft.events.push(getAssistsEvent(line))
-          }
-          if (line.includes('killed') && !line.includes('killed other')) {
-            draft.events.push(getKillEvent(line))
-          }
-          if (line.includes('Planted_The_Bomb')) {
-            draft.events.push(getBombPlantedEvent(line))
-          }
-          if (line.includes('Defused_The_Bomb')) {
-            draft.events.push(getBombDefusedEvent(line))
-          }
-        }),
-      {
-        sides: {
-          CT: '',
-          TERRORIST: '',
-        },
-        scores: {
-          CT: 0,
-          TERRORIST: 0,
-        },
-        roundStartTimestamp: null,
-        roundEndTimestamp: null,
-        events: [],
-      }
-    )
+  const lines = roundLogs.split('\n')
+  const events = lines.slice(0, -7).reduce<EventDefinition[]>((result, line) => {
+    const event = lineToEvent(line)
+    return event ? [...result, event] : result
+  }, [])
 
   const winner = roundLogs.includes('Team "CT" triggered') ? 'CT' : 'TERRORIST'
 
@@ -110,12 +56,48 @@ const processRoundLog = (roundLogs: string, players: Player[], roundNumber: numb
     : getStartingMoney(roundLogs.split('Starting Freeze period')[0])
 
   return {
-    ...roundData,
+    sides: {
+      CT: roundLogs.match(CT_TEAM_REGEX)?.[1] ?? '',
+      TERRORIST: roundLogs.match(TERRORIST_TEAM_REGEX)?.[1] ?? '',
+    },
+    scores: getScore(lines[lines.length - 3]),
+    roundStartTimestamp: getTimestamp(roundLogs.match(ROUND_START_REGEX)?.[0] ?? ''),
+    roundEndTimestamp: getTimestamp(roundLogs.match(ROUND_END_REGEX)?.[0] ?? ''),
     targetBombed: roundLogs.includes('SFUI_Notice_Target_Bombed'),
-    rawText: roundLogs,
     winner,
-    players: parsePlayerData(players, roundData.events, startingMoney),
+    players: parsePlayerData(players, events, startingMoney),
+    events,
+    rawText: roundLogs,
   }
+}
+
+const lineToEvent = (line: string): EventDefinition | null => {
+  if (line.includes('left buyzone')) {
+    return getLeftBuyzoneEvent(line)
+  }
+  if (line.includes('money change') && line.includes('purchase')) {
+    return getPurchaseEvent(line)
+  }
+  if (line.includes('threw')) {
+    return getThrowEvent(line)
+  }
+  if (line.includes('attacked')) {
+    return getAttackEvent(line)
+  }
+  if (line.includes('assisted killing')) {
+    return getAssistsEvent(line)
+  }
+  if (line.includes('killed') && !line.includes('killed other')) {
+    return getKillEvent(line)
+  }
+  if (line.includes('Planted_The_Bomb')) {
+    return getBombPlantedEvent(line)
+  }
+  if (line.includes('Defused_The_Bomb')) {
+    return getBombDefusedEvent(line)
+  }
+
+  return null
 }
 
 const parsePlayerData = (
