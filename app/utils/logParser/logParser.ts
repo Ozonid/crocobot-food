@@ -109,7 +109,7 @@ const parsePlayerData = (
     const playerEvents = events.filter((event) => event.player.steamId === player.steamId)
 
     const kills = playerEvents.filter((event) => event.type === 'kill').length
-    const headshots = playerEvents.filter(
+    const headShots = playerEvents.filter(
       (event) => event.type === 'kill' && event.isHeadShot
     ).length
     const assists = playerEvents.filter((event) => event.type === 'assist').length
@@ -128,9 +128,14 @@ const parsePlayerData = (
         },
         { health: 0, armor: 0 }
       )
-
     const bombPlanted = !!playerEvents.find((event) => event.type === 'bombPlanted')
     const bombDefused = !!playerEvents.find((event) => event.type === 'bombDefused')
+    const purchases = playerEvents
+      .filter((event) => event.type === 'purchase')
+      .map((event) => ({
+        item: event.item,
+        price: event.price,
+      }))
 
     return {
       ...result,
@@ -139,12 +144,13 @@ const parsePlayerData = (
         loadout,
         startingMoney: startingMoney[player.steamId] || 800,
         kills,
-        headshots,
+        headShots,
         assists,
         damage,
         survived: !isKilled,
         bombPlanted,
         bombDefused,
+        purchases,
       },
     }
   }, {})

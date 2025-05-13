@@ -49,10 +49,23 @@ export interface RoundPlayerData extends Player {
   loadout: string[]
   startingMoney: number
   kills: number
-  headshots: number
+  headShots: number
   assists: number
   survived: boolean
   bombPlanted: boolean
   bombDefused: boolean
   damage: Damage
+  purchases: { item: string; price: number }[]
+}
+
+export interface PlayerStatistics {
+  name: string
+  kills: number
+  headShots: number
+  assists: number
+  deaths: number
+  bombPlanted: number
+  bombDefused: number
+  purchaseCount: number
+  purchaseTotal: number
 }
