@@ -17,7 +17,7 @@ export const getLeftBuyzoneEvent = (line: string): LeftBuyzoneEvent => {
     timestamp: getTimestamp(line),
     player: getPlayer(line),
     type: 'leftBuyzone',
-    loadout: (line.match(LOADOUT_REGEX)?.[1] ?? '').split(' '),
+    loadout: (line.match(LOADOUT_REGEX)?.[1] ?? '').split(' ').filter(Boolean),
   }
 }
 
