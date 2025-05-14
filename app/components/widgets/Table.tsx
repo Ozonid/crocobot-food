@@ -5,7 +5,8 @@ export type ColumnValue = string | number | boolean
 // FIXME: the K generic type is a hacky solution to avoid type errors and it results in type-casting
 // inside formatter functions. Look for a better solution.
 export interface Column<T, K extends ColumnValue = ColumnValue> {
-  label: string
+  name: string
+  header?: React.ReactNode
   accessor: (item: T) => K
   formatter?: (item: K) => string | number | React.ReactNode
   colWidth: number
@@ -37,19 +38,19 @@ export default function Table<T>({ data, columns, sortCol, onSort }: TableProps<
   }
 
   return (
-    <table className="flex-1 table-fixed">
+    <table className="w-full table-fixed border-collapse">
       <thead>
         <tr>
-          {columns.map(({ label, colWidth }) => (
+          {columns.map(({ name, header, colWidth }) => (
             <th
-              key={label}
+              key={name}
               style={{ width: colWidth }}
-              className="cursor-pointer border-b-2 border-slate-600 px-2 py-1 hover:bg-slate-700"
-              onClick={() => onSort?.(label)}
+              className="cursor-pointer border-b-2 border-slate-600 px-3 py-2 text-sm font-semibold text-slate-300 transition-colors hover:bg-slate-700/50"
+              onClick={() => onSort?.(name)}
             >
-              <div className="flex items-center justify-center">
-                {label}
-                {getSortIcon(label)}
+              <div className="flex items-center justify-center gap-1">
+                {header || name}
+                {getSortIcon(name)}
               </div>
             </th>
           ))}
@@ -57,9 +58,12 @@ export default function Table<T>({ data, columns, sortCol, onSort }: TableProps<
       </thead>
       <tbody>
         {sortData(data, columns, sortCol).map((item, index) => (
-          <tr key={index} className="hover:bg-slate-800/50">
-            {columns.map(({ label, accessor, formatter }) => (
-              <td key={label} className="text-center">
+          <tr
+            key={index}
+            className="border-b border-slate-700/50 transition-colors hover:bg-slate-700/30"
+          >
+            {columns.map(({ accessor, formatter }, idx) => (
+              <td key={idx} className="px-3 py-2 text-center text-sm text-slate-200">
                 {formatter ? formatter(accessor(item)) : accessor(item)}
               </td>
             ))}
@@ -76,7 +80,7 @@ const sortData = <T,>(data: T[], columns: Column<T, ColumnValue>[], sortCol: Sor
   }
 
   return [...data].sort((a, b) => {
-    const column = columns.find((col) => col.label === sortCol.name)
+    const column = columns.find((col) => col.name === sortCol.name)
     if (!column) return 0
 
     const aValue = column.accessor(a)

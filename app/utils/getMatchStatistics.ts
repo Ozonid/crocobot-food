@@ -2,6 +2,7 @@ import { differenceInSeconds } from 'date-fns'
 import type { GameData, PlayerStatistics, RoundData } from '@/app/types/Data'
 
 interface MatchStatistics {
+  winningTeam: string
   finalScore: {
     [team: string]: number
   }
@@ -29,6 +30,10 @@ export const getMatchStatistics = (gameData: GameData): MatchStatistics => {
   )
 
   return {
+    winningTeam:
+      finalRound.scores.CT > finalRound.scores.TERRORIST
+        ? finalRound.sides.CT
+        : finalRound.sides.TERRORIST,
     finalScore,
     averageRoundTime: getAverageRoundTime(gameData.rounds),
     playerStatistics,

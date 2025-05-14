@@ -7,6 +7,7 @@ import { getMatchStatistics } from '@/app/utils/getMatchStatistics'
 import { formatMoney } from '@/app/utils/dataFormatters'
 import Card from '@/app/components/widgets/Card'
 import dynamic from 'next/dynamic'
+import { GiBoltCutter, GiTimeDynamite } from 'react-icons/gi'
 
 const MoneyChart = dynamic(() => import('@/app/components/MatchStatistics/MoneyChart'), {
   ssr: false,
@@ -30,30 +31,29 @@ export default function MatchStatistics({ gameData }: { gameData: GameData }) {
   const matchStatistics = getMatchStatistics(gameData)
 
   return (
-    <div className="flex flex-col items-center gap-16">
-      <div className="mx-auto flex w-[80%] max-w-[1600px] flex-col gap-16">
+    <div className="flex max-h-full flex-col items-center gap-8 overflow-y-auto">
+      <div className="mx-auto flex w-[80%] max-w-[1600px] flex-col gap-4">
         {Object.entries(matchStatistics.playerStatistics).map(([team, players], idx) => (
-          <div key={team} className="flex items-center gap-16">
+          <Card key={team} className="flex items-center gap-8">
             <div
-              className={`${idx === 0 ? 'flex-col' : 'flex-col-reverse'} flex w-[200px] items-center justify-center gap-4 rounded-md bg-slate-600 px-6 py-4`}
+              className={`${idx === 0 ? 'flex-col' : 'flex-col-reverse'} flex w-[200px] items-center justify-center gap-4 p-4`}
             >
               <p className="text-2xl">{team}</p>
-              <p className="text-4xl">{matchStatistics.finalScore[team]}</p>
+              <p
+                className={`text-4xl ${matchStatistics.winningTeam === team ? 'text-green-500' : 'text-red-500'} font-bold`}
+              >
+                {matchStatistics.finalScore[team]}
+              </p>
             </div>
             <Table data={players} columns={columns} sortCol={sortCol} onSort={handleSort} />
-          </div>
+          </Card>
         ))}
       </div>
 
-      <div className="mx-auto h-[1px] w-[40%] rounded-full bg-slate-300" />
-
-      <div className="flex flex-col gap-8">
-        <p className="text-center text-2xl">Team statistics</p>
-        <div className="grid grid-cols-2 gap-16">
-          <Card>
-            <MoneyChart gameData={gameData} />
-          </Card>
-        </div>
+      <div className="grid grid-cols-1 gap-4">
+        <Card>
+          <MoneyChart gameData={gameData} />
+        </Card>
       </div>
     </div>
   )
@@ -69,34 +69,44 @@ const formatNumberWithSign = (value: ColumnValue) => {
 }
 
 const columns: Column<PlayerStatistics>[] = [
-  { label: 'Name', accessor: (player: PlayerStatistics) => player.name, colWidth: 240 },
-  { label: 'K', accessor: (player: PlayerStatistics) => player.kills, colWidth: 40 },
-  { label: 'D', accessor: (player: PlayerStatistics) => player.deaths, colWidth: 40 },
-  { label: 'A', accessor: (player: PlayerStatistics) => player.assists, colWidth: 40 },
+  { name: 'Name', accessor: (player: PlayerStatistics) => player.name, colWidth: 100 },
+  { name: 'K', accessor: (player: PlayerStatistics) => player.kills, colWidth: 40 },
+  { name: 'D', accessor: (player: PlayerStatistics) => player.deaths, colWidth: 40 },
+  { name: 'A', accessor: (player: PlayerStatistics) => player.assists, colWidth: 40 },
   {
-    label: 'K/D',
+    name: 'K/D',
     accessor: (player: PlayerStatistics) => player.kills / player.deaths,
     formatter: (value: ColumnValue) => (value as number).toFixed(2),
     colWidth: 80,
   },
   {
-    label: '+/-',
+    name: '+/-',
     accessor: (player: PlayerStatistics) => player.kills - player.deaths,
     formatter: formatNumberWithSign,
     colWidth: 40,
   },
-  { label: 'HS', accessor: (player: PlayerStatistics) => player.headShots, colWidth: 40 },
-  { label: 'Plants', accessor: (player: PlayerStatistics) => player.bombPlanted, colWidth: 40 },
-  { label: 'Defuses', accessor: (player: PlayerStatistics) => player.bombDefused, colWidth: 40 },
+  { name: 'HS', accessor: (player: PlayerStatistics) => player.headShots, colWidth: 40 },
   {
-    label: 'Purchases',
-    accessor: (player: PlayerStatistics) => player.purchaseCount,
-    colWidth: 200,
+    name: 'Plants',
+    header: <GiTimeDynamite size={20} />,
+    accessor: (player: PlayerStatistics) => player.bombPlanted,
+    colWidth: 40,
   },
   {
-    label: 'Money spent',
+    name: 'Defuses',
+    header: <GiBoltCutter size={20} />,
+    accessor: (player: PlayerStatistics) => player.bombDefused,
+    colWidth: 40,
+  },
+  {
+    name: 'Purchases',
+    accessor: (player: PlayerStatistics) => player.purchaseCount,
+    colWidth: 100,
+  },
+  {
+    name: 'Money spent',
     accessor: (player: PlayerStatistics) => player.purchaseTotal,
     formatter: (value: ColumnValue) => formatMoney(value as number),
-    colWidth: 200,
+    colWidth: 100,
   },
 ]

@@ -41,7 +41,7 @@ export default function ScoreBoard({ data }: { data: RoundData }) {
 
 const TeamName = ({ team, side }: { team: string; side: Side }) => {
   return (
-    <div className="flex flex-col items-center rounded-md border-2 border-slate-600 px-6 py-4">
+    <div className="flex flex-col items-center">
       <span className="text-3xl font-semibold">{team}</span>
       <span className={`px-2 py-0.5 text-xs font-medium color-${side.toLowerCase()} rounded`}>
         {side}

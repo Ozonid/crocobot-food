@@ -3,13 +3,16 @@ import type { RoundData, Teams } from '@/app/types/Data'
 import ScoreBoard from './ScoreBoard'
 import StatsTable from './StatsTable'
 import GameEventDisplay from '@/app/components/GameEvent/GameEvent'
+import Card from '@/app/components/widgets/Card'
 
 export default function GameRound({ data, teams }: { data: RoundData; teams: Teams }) {
   return (
-    <div className="flex flex-1 flex-col gap-4 overflow-hidden">
+    <div className="mx-auto flex w-[90%] max-w-[1600px] flex-1 flex-col gap-4 overflow-hidden">
       <ScoreBoard data={data} />
 
-      <StatsTable data={data} teams={teams} />
+      <Card>
+        <StatsTable data={data} teams={teams} />
+      </Card>
 
       <span className="text-center text-lg font-medium">Round Log</span>
       <div className="flex flex-1 flex-col gap-2 overflow-y-auto tabular-nums">

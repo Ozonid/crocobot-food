@@ -10,7 +10,7 @@ import type { PropsWithChildren } from 'react'
 
 export default function StatsTable({ data, teams }: { data: RoundData; teams: Teams }) {
   return (
-    <table className="mx-auto w-[90%] max-w-[1600px] table-fixed">
+    <table className="w-full table-fixed">
       <thead>
         <tr>
           {teams[data.sides.CT].map((player: Player) => (
@@ -99,7 +99,7 @@ export default function StatsTable({ data, teams }: { data: RoundData; teams: Te
 const Heading = ({ children, isLabel = false }: PropsWithChildren<{ isLabel?: boolean }>) => {
   return (
     <th
-      className={`px-2 py-1 text-center align-top ${isLabel && 'w-[150px] border-x-1 border-slate-600'}`}
+      className={`border-b-2 border-slate-600 px-3 py-2 text-center align-top ${isLabel && 'w-[150px] border-x-2 border-slate-600'}`}
     >
       {children}
     </th>
@@ -108,7 +108,7 @@ const Heading = ({ children, isLabel = false }: PropsWithChildren<{ isLabel?: bo
 const Cell = ({ children, isLabel = false }: PropsWithChildren<{ isLabel?: boolean }>) => {
   return (
     <td
-      className={`px-2 py-1 text-center ${isLabel ? 'border-x-1 border-slate-600' : 'align-top'}`}
+      className={`px-2 py-1 text-center ${isLabel ? 'border-x-2 border-slate-600' : 'align-top'}`}
     >
       {children}
     </td>

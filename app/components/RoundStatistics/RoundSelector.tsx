@@ -19,7 +19,7 @@ export default function RoundSelector({
           const roundData = rounds[idx]
           return (
             <button
-              className={`rounded-md border-2 py-1 hover:cursor-pointer ${idx === activeRound ? 'border-yellow-600' : 'border-slate-900 hover:border-yellow-900'} ${isDisabled ? 'pointer-events-none opacity-25' : roundData.winner === 'CT' ? 'color-ct' : 'color-terrorist'} font-bold`}
+              className={`rounded-md border-2 py-0.5 transition-colors hover:cursor-pointer ${idx === activeRound ? 'border-amber-700' : 'border-slate-900 hover:border-amber-700/50'} ${isDisabled ? 'pointer-events-none opacity-25' : roundData.winner === 'CT' ? 'color-ct' : 'color-terrorist'} font-bold`}
               key={idx}
               onClick={() => onSelect(idx)}
               disabled={isDisabled}
