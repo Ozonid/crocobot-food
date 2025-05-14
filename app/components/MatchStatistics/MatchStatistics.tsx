@@ -4,9 +4,13 @@ import { useCallback, useState } from 'react'
 import type { GameData, PlayerStatistics } from '@/app/types/Data'
 import Table, { Column, SortCol, ColumnValue } from '@/app/components/widgets/Table'
 import { getMatchStatistics } from '@/app/utils/getMatchStatistics'
-import MoneyChart from '@/app/components/MatchStatistics/MoneyChart'
 import { formatMoney } from '@/app/utils/dataFormatters'
 import Card from '@/app/components/widgets/Card'
+import dynamic from 'next/dynamic'
+
+const MoneyChart = dynamic(() => import('@/app/components/MatchStatistics/MoneyChart'), {
+  ssr: false,
+})
 
 export default function MatchStatistics({ gameData }: { gameData: GameData }) {
   const [sortCol, setSortCol] = useState<SortCol | null>(null)
