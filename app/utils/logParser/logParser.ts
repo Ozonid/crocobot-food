@@ -22,7 +22,7 @@ export const processGameLog = (gameLog: string): GameData => {
   const relevantLog = chunks[chunks.length - 1]
 
   const roundLogs = relevantLog.split(ROUND_SEPARATOR_REGEX).slice(0, -1)
-  const teams = extractTeamData(roundLogs[0])
+  const teams = extractTeamData(roundLogs)
 
   return {
     rounds: roundLogs.reduce<RoundData[]>(
