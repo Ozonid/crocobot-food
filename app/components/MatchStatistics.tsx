@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import type { GameData, PlayerStatistics } from '@/app/types/Data'
-import Table, { Column, SortCol } from './widgets/Table'
+import Table, { Column, SortCol, ColumnValue } from './widgets/Table'
 import { getMatchStatistics } from '@/app/utils/getMatchStatistics'
 
 export default function MatchStatistics({ gameData }: { gameData: GameData }) {
@@ -39,23 +39,24 @@ export default function MatchStatistics({ gameData }: { gameData: GameData }) {
   )
 }
 
-const formatMoney = (money: number) => {
-  return money.toLocaleString('en-US', {
+const formatMoney = (value: ColumnValue) => {
+  return (value as number).toLocaleString('en-US', {
     style: 'currency',
     currency: 'USD',
     maximumFractionDigits: 0,
   })
 }
 
-const formatNumberWithSign = (number: number) => {
-  return number > 0 ? (
-    <span className="text-green-500">+{number}</span>
+const formatNumberWithSign = (value: ColumnValue) => {
+  const num = value as number
+  return num > 0 ? (
+    <span className="text-green-500">+{num}</span>
   ) : (
-    <span className="text-red-500">{number}</span>
+    <span className="text-red-500">{num}</span>
   )
 }
 
-const columns: (Column<PlayerStatistics, string> | Column<PlayerStatistics, number>)[] = [
+const columns: Column<PlayerStatistics>[] = [
   { label: 'Name', accessor: (player: PlayerStatistics) => player.name, colWidth: 240 },
   { label: 'K', accessor: (player: PlayerStatistics) => player.kills, colWidth: 40 },
   { label: 'D', accessor: (player: PlayerStatistics) => player.deaths, colWidth: 40 },
@@ -63,7 +64,7 @@ const columns: (Column<PlayerStatistics, string> | Column<PlayerStatistics, numb
   {
     label: 'K/D',
     accessor: (player: PlayerStatistics) => player.kills / player.deaths,
-    formatter: (value: number) => value.toFixed(2),
+    formatter: (value: ColumnValue) => (value as number).toFixed(2),
     colWidth: 80,
   },
   {

@@ -1,6 +1,9 @@
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa'
 
 export type ColumnValue = string | number | boolean
+
+// FIXME: the K generic type is a hacky solution to avoid type errors and it results in type-casting
+// inside formatter functions. Look for a better solution.
 export interface Column<T, K extends ColumnValue = ColumnValue> {
   label: string
   accessor: (item: T) => K
