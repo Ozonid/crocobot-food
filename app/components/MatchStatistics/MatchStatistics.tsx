@@ -8,6 +8,7 @@ import { formatMoney } from '@/app/utils/dataFormatters'
 import Card from '@/app/components/widgets/Card'
 import dynamic from 'next/dynamic'
 import { GiBoltCutter, GiTimeDynamite } from 'react-icons/gi'
+import SignedNumber from '@/app/components/widgets/SignedNumber'
 
 const MoneyChart = dynamic(() => import('@/app/components/MatchStatistics/MoneyChart'), {
   ssr: false,
@@ -59,15 +60,6 @@ export default function MatchStatistics({ gameData }: { gameData: GameData }) {
   )
 }
 
-const formatNumberWithSign = (value: ColumnValue) => {
-  const num = value as number
-  return num > 0 ? (
-    <span className="text-green-500">+{num}</span>
-  ) : (
-    <span className="text-red-500">{num}</span>
-  )
-}
-
 const columns: Column<PlayerStatistics>[] = [
   { name: 'Name', accessor: (player: PlayerStatistics) => player.name, colWidth: 100 },
   { name: 'K', accessor: (player: PlayerStatistics) => player.kills, colWidth: 40 },
@@ -82,7 +74,7 @@ const columns: Column<PlayerStatistics>[] = [
   {
     name: '+/-',
     accessor: (player: PlayerStatistics) => player.kills - player.deaths,
-    formatter: formatNumberWithSign,
+    formatter: (value: ColumnValue) => <SignedNumber value={value as number} />,
     colWidth: 40,
   },
   { name: 'HS', accessor: (player: PlayerStatistics) => player.headShots, colWidth: 40 },
