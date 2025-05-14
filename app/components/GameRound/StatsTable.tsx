@@ -98,14 +98,20 @@ export default function StatsTable({ data, teams }: { data: RoundData; teams: Te
 
 const Heading = ({ children, isLabel = false }: PropsWithChildren<{ isLabel?: boolean }>) => {
   return (
-    <th className={`px-2 py-1 text-center align-top ${isLabel && 'w-[150px] border-x-1'}`}>
+    <th
+      className={`px-2 py-1 text-center align-top ${isLabel && 'w-[150px] border-x-1 border-slate-600'}`}
+    >
       {children}
     </th>
   )
 }
 const Cell = ({ children, isLabel = false }: PropsWithChildren<{ isLabel?: boolean }>) => {
   return (
-    <td className={`px-2 py-1 text-center ${isLabel ? 'border-x-1' : 'align-top'}`}>{children}</td>
+    <td
+      className={`px-2 py-1 text-center ${isLabel ? 'border-x-1 border-slate-600' : 'align-top'}`}
+    >
+      {children}
+    </td>
   )
 }
 
