@@ -2,8 +2,11 @@
 
 import { useCallback, useState } from 'react'
 import type { GameData, PlayerStatistics } from '@/app/types/Data'
-import Table, { Column, SortCol, ColumnValue } from './widgets/Table'
+import Table, { Column, SortCol, ColumnValue } from '@/app/components/widgets/Table'
 import { getMatchStatistics } from '@/app/utils/getMatchStatistics'
+import MoneyChart from '@/app/components/MatchStatistics/MoneyChart'
+import { formatMoney } from '@/app/utils/dataFormatters'
+import Card from '@/app/components/widgets/Card'
 
 export default function MatchStatistics({ gameData }: { gameData: GameData }) {
   const [sortCol, setSortCol] = useState<SortCol | null>(null)
@@ -23,28 +26,33 @@ export default function MatchStatistics({ gameData }: { gameData: GameData }) {
   const matchStatistics = getMatchStatistics(gameData)
 
   return (
-    <div className="mx-auto flex w-[80%] max-w-[1600px] flex-col gap-8">
-      {Object.entries(matchStatistics.playerStatistics).map(([team, players], idx) => (
-        <div key={team} className="flex items-center gap-16">
-          <div
-            className={`${idx === 0 ? 'flex-col' : 'flex-col-reverse'} flex w-[200px] items-center justify-center gap-4`}
-          >
-            <p className="text-2xl">{team}</p>
-            <p className="text-4xl">{matchStatistics.finalScore[team]}</p>
+    <div className="flex flex-col items-center gap-16">
+      <div className="mx-auto flex w-[80%] max-w-[1600px] flex-col gap-16">
+        {Object.entries(matchStatistics.playerStatistics).map(([team, players], idx) => (
+          <div key={team} className="flex items-center gap-16">
+            <div
+              className={`${idx === 0 ? 'flex-col' : 'flex-col-reverse'} flex w-[200px] items-center justify-center gap-4 rounded-md bg-slate-600 px-6 py-4`}
+            >
+              <p className="text-2xl">{team}</p>
+              <p className="text-4xl">{matchStatistics.finalScore[team]}</p>
+            </div>
+            <Table data={players} columns={columns} sortCol={sortCol} onSort={handleSort} />
           </div>
-          <Table data={players} columns={columns} sortCol={sortCol} onSort={handleSort} />
+        ))}
+      </div>
+
+      <div className="mx-auto h-[1px] w-[40%] rounded-full bg-slate-300" />
+
+      <div className="flex flex-col gap-8">
+        <p className="text-center text-2xl">Team statistics</p>
+        <div className="grid grid-cols-2 gap-16">
+          <Card>
+            <MoneyChart gameData={gameData} />
+          </Card>
         </div>
-      ))}
+      </div>
     </div>
   )
-}
-
-const formatMoney = (value: ColumnValue) => {
-  return (value as number).toLocaleString('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  })
 }
 
 const formatNumberWithSign = (value: ColumnValue) => {
@@ -84,7 +92,7 @@ const columns: Column<PlayerStatistics>[] = [
   {
     label: 'Money spent',
     accessor: (player: PlayerStatistics) => player.purchaseTotal,
-    formatter: formatMoney,
+    formatter: (value: ColumnValue) => formatMoney(value as number),
     colWidth: 200,
   },
 ]

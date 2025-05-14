@@ -1,6 +1,6 @@
 import Tabs from '@/app/components/widgets/Tabs'
 import { processGameLog } from '@/app/utils/logParser/logParser'
-import MatchStatistics from '@/app/components/MatchStatistics'
+import MatchStatistics from '@/app/components/MatchStatistics/MatchStatistics'
 import RoundStatistics from '@/app/components/RoundStatistics/RoundStatistics'
 import { Suspense } from 'react'
 
